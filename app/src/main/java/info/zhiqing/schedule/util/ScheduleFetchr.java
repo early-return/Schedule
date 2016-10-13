@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import info.zhiqing.schedule.models.Course;
+import info.zhiqing.schedule.models.Score;
 import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.Headers;
@@ -36,34 +37,152 @@ import okhttp3.Response;
 public class ScheduleFetchr {
     private static final String TAG = "info.zhiqing.HtmlFetchr";
 
+    //some constant
+    public static final int LOGIN = 0;
+    public static final int SCORE = 1;
+
+    //Http client
     private OkHttpClient client = new OkHttpClient();
 
-    private final String baseUrl = "http://61.139.105.138";
-    private final String loginUrl = "/default2.aspx";
+    //URLs
+    private String baseUrl = "http://61.139.105.138";
+    private String loginUrl = "/default2.aspx";
+    private String scheduleUrl = "/xskbcx.aspx";
+    private String scoreUrl = "/xscjcx_dq.aspx";
 
+    //cookie strings
     private String cookie = "";
-    private String csrf = "";
 
+    //student login information
+    private String number = "";
+    private String pass = "";
+    private String params = "";
+    private String name = "";
 
-    ScheduleFetchr(){
-        setCookieAndCsrf();
+    /**
+     * Constructor
+     * @param number student number
+     * @param pass the password
+     */
+    ScheduleFetchr(String number, String pass){
+        this.number = number;
+        this.pass = pass;
+        params = "?xh=" + number;
+        setCookie();
     }
 
-    void setCookieAndCsrf(){
+
+    //setter an getter
+    /**
+     * number setter
+     * @param number student number
+     */
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    /**
+     * password setter
+     * @param pass the password
+     */
+    public void setPass(String pass) {
+        this.pass = pass;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    //some tools
+
+    /**
+     * encode encode url to urlcode with gb2312
+     * @param url source string
+     * @return urlcoded string
+     */
+    private String codeUrl(String url) {
+        String str = "";
+        try{
+            str = URLEncoder.encode(url, "gb2312");
+        } catch (IOException ioe) {
+
+        }
+        return str;
+    }
+
+    /**
+     *
+     * @param resp response
+     * @return
+     */
+    private String decodeResponse(Response resp) {
+        String str = "";
+        if(resp == null){
+            return str;
+        }
+        try{
+            str =  new String(resp.body().bytes(), "gb2312");
+        } catch (IOException ioe) {
+
+        }
+
+        return str;
+    }
+
+    private float toFloat(String str){
+        float f = 0;
+        try{
+            f = Float.parseFloat(str);
+        } catch (NumberFormatException e){
+            f = 0;
+        }
+        return f;
+    }
+
+
+    /**
+     * request cookies and save it
+     */
+    private void setCookie(){
         Request request = new Request.Builder()
                 .url(baseUrl + loginUrl)
                 .build();
         try {
             Response response = client.newCall(request).execute();
             cookie = response.header("Set-Cookie");
-            Document doc = Jsoup.parse(response.body().string());
-            csrf = doc.select("input[name=__VIEWSTATE]").first().attr("value");
         } catch (IOException ioe) {
 
         }
     }
 
-    void logIn(String number, String pass, String code){
+    /**
+     * request the csrf value and save it
+     * @param type SCHEDULE or SCORE
+     */
+    private String getCsrf(int type){
+        String csrf = "";
+        String url = baseUrl + loginUrl;
+
+        //build request with url
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Referer", url)
+                .build();
+
+        //request the page and find the csrf value
+        try {
+            Response response = client.newCall(request).execute();
+            Document doc = Jsoup.parse(response.body().string());
+            csrf = doc.select("input[name=__VIEWSTATE]").first().attr("value");
+        } catch (IOException ioe) {
+
+        }
+        return csrf;
+    }
+
+    void logIn(String code){
+        String url = baseUrl + loginUrl;
+
         Request request;
         Response response;
 
@@ -77,48 +196,49 @@ public class ScheduleFetchr {
 
 
         //由于教务系统采用的GB2312编码，需手动拼接表单数据
+        RequestBody body = RequestBody.create(
+                MediaType.parse("application/x-www-form-urlencoded;charset=gb2312"),
+                "__VIEWSTATE=" + getCsrf(LOGIN)
+                        + "&txtUserName=" + number // number
+                        + "&TextBox2=" + pass // password
+                        + "&txtSecretCode=" + code
+                        + "&RadioButtonList1=" + codeUrl("学生") //连接gb2312编码的 "学生" 字符串
+                        + "&Button1=&lbLanguage=&hidPdrs=&hidsc=");
+
+        request = new Request.Builder()
+                .url(url)
+                .addHeader("Cookie", cookie)
+                .addHeader("Referer", url)
+                .post(body)
+                .build();
+
         try{
-            RequestBody body = RequestBody.create(
-                    MediaType.parse("application/x-www-form-urlencoded;charset=gb2312"),
-                    "__VIEWSTATE=" + URLEncoder.encode(csrf, "gb2312")
-                            + "&txtUserName=" + URLEncoder.encode(number,"gb2312") //名字
-                            + "&TextBox2=" + URLEncoder.encode(pass, "gb2312") // 密码
-                            + "&txtSecretCode=" + URLEncoder.encode(code,"gb2312")
-                            + "&RadioButtonList1=" + URLEncoder.encode("学生", "gb2312") //连接gb2312编码的 "学生" 字符串
-                            + "&Button1=&lbLanguage=&hidPdrs=&hidsc=");
-
-            request = new Request.Builder()
-                    .url(baseUrl + loginUrl)
-                    .addHeader("Cookie", cookie)
-                    .addHeader("Referer", baseUrl + loginUrl)
-                    .post(body)
-                    .build();
-
             response = client.newCall(request).execute();
+            Document doc = Jsoup.parse(response.body().string());
+            name = doc.select("span#xhxm").first().text();
+            System.out.println(name);
         } catch (IOException ioe){
 
         }
     }
 
-    public List<Course> fetchSchedule(String number, String pass, String code) {
-        String scheduleUrl = "/xskbcx.aspx?xh=" + number;
+    public List<Course> fetchSchedule() {
+        String url = baseUrl + scheduleUrl + params;
 
         Pattern r = Pattern.compile("(^[<>]+)<br>((.+)<br>)?(.+)<br>(.+)<br>(.+)");
 
-        List<Course> courses = new ArrayList<Course>();
+        List<Course> courses = new ArrayList<>();
 
         Request request;
         Response response;
 
-        logIn(number, pass, code);
+        request = new Request.Builder()
+                .url(url)
+                .addHeader("Cookie", cookie)
+                .addHeader("Referer", url)
+                .build();
 
         try{
-            request = new Request.Builder()
-                    .url(baseUrl + scheduleUrl)
-                    .addHeader("Cookie", cookie)
-                    .addHeader("Referer", baseUrl + scheduleUrl)
-                    .build();
-
             response = client.newCall(request).execute();
 
             System.out.println(response.code());
@@ -148,6 +268,70 @@ public class ScheduleFetchr {
         return courses;
     }
 
+    public List<Score> fetchScore() {
+        String url = baseUrl + scoreUrl + params;
+        String csrf = "";
+
+        List<Score> scoreList = new ArrayList<>();
+
+        Pattern r = Pattern.compile("");
+
+        Request request;
+        Response response;
+
+        request = new Request.Builder()
+                .url(url)
+                .addHeader("Cookie", cookie)
+                .addHeader("Referer", url)
+                .build();
+
+        try {
+            response = client.newCall(request).execute();
+            Document doc = Jsoup.parse(response.body().string());
+            csrf = doc.select("input[name=__VIEWSTATE]").first().attr("value");
+        } catch (IOException ioe) {
+
+        }
+
+        RequestBody body = RequestBody.create(
+                MediaType.parse("application/x-www-form-urlencoded;charset=gb2312"),
+                "__EVENTTARGET=&__EVENTARGUMENT="
+                        + "&__VIEWSTATE=" + codeUrl(csrf)
+                        + "&ddlxn=" + codeUrl("全部")
+                        + "&ddlxq=" + codeUrl("全部")
+                        + "&btnCx=" + codeUrl(" 查  询 "));
+
+        request = new Request.Builder()
+                .url(url)
+                .addHeader("Cookie", cookie)
+                .addHeader("Referer", url)
+                .post(body)
+                .build();
+
+        try{
+            response = client.newCall(request).execute();
+            Document doc = Jsoup.parse(response.body().string());
+            Elements eles = doc.select("table#DataGrid1 tr:not(.datelisthead)");
+            for (Element ele : eles) {
+                Score score = new Score(ele.child(0).text(),
+                        ele.child(1).text(),
+                        ele.child(2).text(),
+                        ele.child(3).text(),
+                        ele.child(4).text(),
+                        toFloat(ele.child(6).text()),
+                        toFloat(ele.child(7).text()),
+                        toFloat(ele.child(9).text()),
+                        toFloat(ele.child(11).text()),
+                        toFloat(ele.child(12).text()));
+                scoreList.add(score);
+            }
+            System.out.println(eles.size());
+        } catch (IOException ioe) {
+
+        }
+        return scoreList;
+    }
+
     public byte[] fetchCodeImageBytes() throws IOException{
         Request request = new Request.Builder()
                 .url(baseUrl + "/CheckCode.aspx")
@@ -167,7 +351,7 @@ public class ScheduleFetchr {
 
 
     public static void main(String[] args) throws IOException {
-        ScheduleFetchr fetchr = new ScheduleFetchr();
+        ScheduleFetchr fetchr = new ScheduleFetchr("14101010607", "lzq1997201");
 
         byte[] bytes = fetchr.fetchCodeImageBytes();
         DataOutputStream dos = new DataOutputStream(new FileOutputStream("/home/zhiqing/code.gif"));
@@ -177,6 +361,8 @@ public class ScheduleFetchr {
         Scanner in = new Scanner(System.in);
         String code = in.nextLine();
 
-        fetchr.fetchSchedule("14101010607", "lzq1997201", code);
+        fetchr.logIn(code);
+        fetchr.fetchSchedule();
+        System.out.println(fetchr.fetchScore());
     }
 }

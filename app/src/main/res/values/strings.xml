@@ -5,7 +5,12 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="nav_schedule">课程表</string>
-    <string name="nav_term">学期</string>
+    <string name="nav_score">成绩</string>
+    <string name="nav_info">个人信息</string>
+    <string name="nav_friends">校友圈</string>
 
     <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

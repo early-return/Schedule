@@ -59,16 +59,21 @@ public class ScheduleFetchr {
     private String params = "";
     private String name = "";
 
+    private boolean isLogged = false;
+
     /**
      * Constructor
      * @param number student number
      * @param pass the password
      */
-    ScheduleFetchr(String number, String pass){
+    public ScheduleFetchr(String number, String pass){
         this.number = number;
         this.pass = pass;
         params = "?xh=" + number;
-        setCookie();
+    }
+
+    public ScheduleFetchr() {
+
     }
 
 
@@ -79,6 +84,7 @@ public class ScheduleFetchr {
      */
     public void setNumber(String number) {
         this.number = number;
+        params = "?xh=" + number;
     }
 
     /**
@@ -134,7 +140,17 @@ public class ScheduleFetchr {
         try{
             f = Float.parseFloat(str);
         } catch (NumberFormatException e){
-            f = 0;
+            if(str.trim().equals("优秀") || str.trim().equals("优")){
+                f = 90;
+            } else if (str.trim().equals("良好") || str.trim().equals("良")) {
+                f = 80;
+            } else if (str.trim().equals("中等") || str.trim().equals("中")) {
+                f = 70;
+            } else if(str.trim().equals("及格")) {
+                f = 60;
+            } else {
+                f = 0;
+            }
         }
         return f;
     }
@@ -180,8 +196,16 @@ public class ScheduleFetchr {
         return csrf;
     }
 
-    void logIn(String code){
+    public void logIn(String code){
         String url = baseUrl + loginUrl;
+
+        if(isLogged){
+            return;
+        }
+
+        if(cookie.equals("") || cookie == null) {
+            setCookie();
+        }
 
         Request request;
         Response response;
@@ -220,10 +244,16 @@ public class ScheduleFetchr {
         } catch (IOException ioe){
 
         }
+
+        isLogged = true;
     }
 
     public List<Course> fetchSchedule() {
         String url = baseUrl + scheduleUrl + params;
+
+        if(cookie.equals("") || cookie == null) {
+            setCookie();
+        }
 
         Pattern r = Pattern.compile("(^[<>]+)<br>((.+)<br>)?(.+)<br>(.+)<br>(.+)");
 
@@ -333,6 +363,11 @@ public class ScheduleFetchr {
     }
 
     public byte[] fetchCodeImageBytes() throws IOException{
+
+        if(cookie.equals("") || cookie == null) {
+            setCookie();
+        }
+
         Request request = new Request.Builder()
                 .url(baseUrl + "/CheckCode.aspx")
                 .addHeader("Cookie", cookie)

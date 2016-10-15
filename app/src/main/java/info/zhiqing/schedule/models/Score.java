@@ -1,10 +1,12 @@
 package info.zhiqing.schedule.models;
 
+import java.io.Serializable;
+
 /**
  * Created by zhiqing on 16-10-13.
  */
 
-public class Score {
+public class Score implements Serializable{
     private String year;
     private String semester;
     private String code;

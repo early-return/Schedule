@@ -9,8 +9,11 @@
     <string name="nav_info">个人信息</string>
     <string name="nav_friends">校友圈</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="action_fetchr">更新数据</string>
+    <string name="action_settings">设置</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_fetchr">获取数据</string>
+    <string name="fetchr_button">获取</string>
+
+    <string name="hello_blank_fragment">Hello</string>
 </resources>

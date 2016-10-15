@@ -1,5 +1,6 @@
 package info.zhiqing.schedule;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,10 +17,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import info.zhiqing.schedule.ui.FetchrActivity;
 import info.zhiqing.schedule.ui.FriendsFragment;
 import info.zhiqing.schedule.ui.InfoFragment;
 import info.zhiqing.schedule.ui.ScheduleDayFragment;
 import info.zhiqing.schedule.ui.ScoreListFragment;
+import info.zhiqing.schedule.util.Fetchr;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        getSupportActionBar().setTitle(R.string.nav_schedule);
         replaceFragment(new ScheduleDayFragment());
     }
 
@@ -77,7 +81,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_fetchr) {
+            Intent intent = new Intent(this, FetchrActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.action_settings) {
             return true;
         }
 
@@ -91,12 +99,16 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_schedule) {
+            getSupportActionBar().setTitle(R.string.nav_schedule);
             replaceFragment(new ScheduleDayFragment());
         } else if (id == R.id.nav_score) {
+            getSupportActionBar().setTitle(R.string.nav_score);
             replaceFragment(new ScoreListFragment());
         } else if (id == R.id.nav_info) {
+            getSupportActionBar().setTitle(R.string.nav_info);
             replaceFragment(new InfoFragment());
         } else if (id == R.id.nav_friends) {
+            getSupportActionBar().setTitle(R.string.nav_friends);
             replaceFragment(new FriendsFragment());
         } else if (id == R.id.nav_share) {
 

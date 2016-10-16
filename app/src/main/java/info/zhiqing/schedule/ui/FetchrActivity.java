@@ -1,23 +1,31 @@
 package info.zhiqing.schedule.ui;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.Preference;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.List;
 
+import info.zhiqing.schedule.MainActivity;
 import info.zhiqing.schedule.R;
 import info.zhiqing.schedule.models.Database;
 import info.zhiqing.schedule.models.Score;
@@ -25,6 +33,8 @@ import info.zhiqing.schedule.util.ScheduleFetchr;
 
 public class FetchrActivity extends AppCompatActivity {
     private final String TAG = "FetchrActivity";
+
+    public static final String BROADCAST = "info.zhiqing.schedule.FETCHED";
 
     TextInputEditText numberEditText;
     TextInputEditText passwordEditText;
@@ -60,6 +70,25 @@ public class FetchrActivity extends AppCompatActivity {
                 fetchr.setNumber(numberEditText.getText().toString());
                 fetchr.setPass(passwordEditText.getText().toString());
                 new ScoreFetchrTask().execute(codeEditText.getText().toString());
+            }
+        });
+
+        codeEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                if(s.length() != 4){
+                    codeEditText.setError("请输入正确格式的验证码");
+                }
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
 
@@ -102,6 +131,15 @@ public class FetchrActivity extends AppCompatActivity {
 
             Database db = new Database(FetchrActivity.this);
             db.replaceScores(scores);
+
+            SharedPreferences.Editor editor = getApplication()
+                    .getSharedPreferences(MainActivity.SHARED_PREFER, MODE_PRIVATE).edit();
+
+            editor.putString(MainActivity.SHARED_PREFER_NAME, fetchr.getName());
+            editor.commit();
+
+            Intent intent = new Intent(BROADCAST);
+            sendBroadcast(intent);
 
             return scores;
         }

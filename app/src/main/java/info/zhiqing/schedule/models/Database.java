@@ -48,9 +48,30 @@ public class Database {
         db.delete("scores", null, null);
         insertScores(scores);
     }
-    public List<Score> getScores(){
+
+    public List<Score> getScores(String year, String semester){
         List<Score> scores = new ArrayList<>();
-        Cursor c = db.rawQuery("SELECT * FROM scores", null);
+
+        String sql = "SELECT * FROM scores ";
+        String where = "";
+        String and = "";
+        String yearWhere = "";
+        String semesterWhere = "";
+
+        if(!year.equals("") && !year.equals("*")){
+            yearWhere = " year='" + year + "' ";
+            where = " WHERE ";
+        }
+
+        if(!semester.equals("") && !semester.equals("*")){
+            semesterWhere = " semester='" + semester + "'";
+            if(!where.equals("")){
+                and = " AND ";
+            } else {
+                where = " WHERE ";
+            }
+        }
+        Cursor c = db.rawQuery(sql + where + yearWhere + and + semesterWhere + ";" , null);
 
         Log.d(TAG, "Get " + c.getCount());
         if(c.moveToFirst()){
@@ -71,5 +92,22 @@ public class Database {
             }
         }
         return scores;
+    }
+
+    public List<Score> getScores(){
+        return getScores("*", "*");
+    }
+
+    public String[] getYears(){
+        List<String> years = new ArrayList<>();
+        Cursor c = db.rawQuery("SELECT DISTINCT year FROM scores", null);
+
+        if(c.moveToFirst()){
+            while (!c.isAfterLast()){
+                years.add(c.getString(0));
+                c.moveToNext();
+            }
+        }
+        return years.toArray(new String[0]);
     }
 }

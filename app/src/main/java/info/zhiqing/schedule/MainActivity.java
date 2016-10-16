@@ -1,6 +1,9 @@
 package info.zhiqing.schedule;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import info.zhiqing.schedule.ui.FetchrActivity;
 import info.zhiqing.schedule.ui.FriendsFragment;
@@ -26,6 +30,13 @@ import info.zhiqing.schedule.util.Fetchr;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    public static final String SHARED_PREFER = "shared";
+    public static final String SHARED_PREFER_NAME = "name";
+
+    private FetchrBroadcastReceiver receiver;
+
+    TextView navHeaderNameTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +65,18 @@ public class MainActivity extends AppCompatActivity
 
         getSupportActionBar().setTitle(R.string.nav_schedule);
         replaceFragment(new ScheduleDayFragment());
+
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(FetchrActivity.BROADCAST);
+        receiver = new FetchrBroadcastReceiver();
+        registerReceiver(receiver, filter);
+
+        navHeaderNameTextView = (TextView) navigationView.getHeaderView(0).findViewById(R.id.navHeaderNameTextView);
+        navHeaderNameTextView.setText(
+                getApplication().getSharedPreferences(SHARED_PREFER, MODE_PRIVATE)
+                        .getString(SHARED_PREFER_NAME, "姓名")
+        );
     }
 
     @Override
@@ -128,5 +151,26 @@ public class MainActivity extends AppCompatActivity
             ft.replace(R.id.fragment, fragment);
         }
         ft.commit();
+    }
+
+    class FetchrBroadcastReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            update();
+        }
+    }
+
+    void update(){
+        navHeaderNameTextView.setText(
+                getApplication().getSharedPreferences(SHARED_PREFER, MODE_PRIVATE)
+                        .getString(SHARED_PREFER_NAME, "姓名")
+        );
+    }
+
+    @Override
+    protected void onStop() {
+        //unregisterReceiver(receiver);
+        super.onStop();
     }
 }

@@ -11,8 +11,15 @@
 
 
         <LinearLayout
+            android:gravity="right"
+            android:paddingRight="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
+            <TextView
+                android:text="学年: "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
             <Spinner
                 android:id="@+id/yearSpinner"
                 android:layout_width="wrap_content"
@@ -20,9 +27,14 @@
 
             </Spinner>
 
-            <Spinner
-                android:id="@+id/termSpinner"
+            <TextView
+                android:text="学期: "
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <Spinner
+                android:id="@+id/semesterSpinner"
+                android:entries="@array/semesters"
+                android:layout_width="50dp"
                 android:layout_height="wrap_content">
 
             </Spinner>

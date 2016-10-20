@@ -1,16 +1,10 @@
 package info.zhiqing.schedule.ui;
 
-import android.content.Context;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +18,6 @@ import java.util.List;
 import info.zhiqing.schedule.R;
 import info.zhiqing.schedule.adapter.ScoreListAdapter;
 import info.zhiqing.schedule.models.Database;
-import info.zhiqing.schedule.util.ScheduleFetchr;
 
 public class ScoreListFragment extends Fragment {
     private static final String TAG = "ScoreListFragment";

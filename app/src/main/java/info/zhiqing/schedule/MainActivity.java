@@ -26,17 +26,30 @@ import info.zhiqing.schedule.ui.FriendsFragment;
 import info.zhiqing.schedule.ui.InfoFragment;
 import info.zhiqing.schedule.ui.ScheduleDayFragment;
 import info.zhiqing.schedule.ui.ScoreListFragment;
-import info.zhiqing.schedule.util.Fetchr;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String SHARED_PREFER = "shared";
     public static final String SHARED_PREFER_NAME = "name";
+    public static final String SHARED_PREFER_NUMBER = "number";
+    public static final String SHARED_PREFER_COLLEGE = "college";
+    public static final String SHARED_PREFER_MAJOR = "major";
+    public static final String SHARED_PREFER_SEX = "sex";
+    public static final String SHARED_PREFER_PROSPECT = "prospect";
+    public static final String SHARED_PREFER_POLITICAL = "political";
+    public static final String SHARED_PREFER_FROM = "from";
+    public static final String SHARED_PREFER_MIDDLE_SCHOOL = "middle_school";
+    public static final String SHARED_PREFER_NATION = "nation";
+    public static final String SHARED_PREFER_ID = "id";
+    public static final String SHARED_PREFER_QUALIFICATION = "qualification";
+    public static final String SHARED_PREFER_CLASS = "class";
+
 
     private FetchrBroadcastReceiver receiver;
 
     TextView navHeaderNameTextView;
+    TextView navHeaderCollegeTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,10 +86,8 @@ public class MainActivity extends AppCompatActivity
         registerReceiver(receiver, filter);
 
         navHeaderNameTextView = (TextView) navigationView.getHeaderView(0).findViewById(R.id.navHeaderNameTextView);
-        navHeaderNameTextView.setText(
-                getApplication().getSharedPreferences(SHARED_PREFER, MODE_PRIVATE)
-                        .getString(SHARED_PREFER_NAME, "姓名")
-        );
+        navHeaderCollegeTextView = (TextView) navigationView.getHeaderView(0).findViewById(R.id.navHeaderCollegeTextView);
+        update();
     }
 
     @Override
@@ -166,11 +177,16 @@ public class MainActivity extends AppCompatActivity
                 getApplication().getSharedPreferences(SHARED_PREFER, MODE_PRIVATE)
                         .getString(SHARED_PREFER_NAME, "姓名")
         );
+
+        navHeaderCollegeTextView.setText(
+                getApplication().getSharedPreferences(SHARED_PREFER, MODE_PRIVATE)
+                        .getString(SHARED_PREFER_COLLEGE, "学院")
+        );
     }
 
     @Override
-    protected void onStop() {
-        //unregisterReceiver(receiver);
-        super.onStop();
+    protected void onDestroy() {
+        unregisterReceiver(receiver);
+        super.onDestroy();
     }
 }

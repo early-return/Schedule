@@ -1,14 +1,10 @@
 package info.zhiqing.schedule.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
-import android.preference.Preference;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,9 +13,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -29,7 +23,7 @@ import info.zhiqing.schedule.MainActivity;
 import info.zhiqing.schedule.R;
 import info.zhiqing.schedule.models.Database;
 import info.zhiqing.schedule.models.Score;
-import info.zhiqing.schedule.util.ScheduleFetchr;
+import info.zhiqing.schedule.util.Fetchr;
 
 public class FetchrActivity extends AppCompatActivity {
     private final String TAG = "FetchrActivity";
@@ -42,7 +36,7 @@ public class FetchrActivity extends AppCompatActivity {
     ImageView codeImageView;
     Button fetchrButton;
 
-    ScheduleFetchr fetchr = new ScheduleFetchr("14101010607", "lzq1997201");
+    Fetchr fetchr = new Fetchr("14101010607", "lzq1997201");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +63,7 @@ public class FetchrActivity extends AppCompatActivity {
             public void onClick(View v) {
                 fetchr.setNumber(numberEditText.getText().toString());
                 fetchr.setPass(passwordEditText.getText().toString());
-                new ScoreFetchrTask().execute(codeEditText.getText().toString());
+                new DataFetchrTask().execute(codeEditText.getText().toString());
             }
         });
 
@@ -119,7 +113,7 @@ public class FetchrActivity extends AppCompatActivity {
         }
     }
 
-    class ScoreFetchrTask extends AsyncTask<String, Void, List<Score>>{
+    class DataFetchrTask extends AsyncTask<String, Void, List<Score>>{
 
         @Override
         protected List<Score> doInBackground(String... params) {
@@ -136,6 +130,18 @@ public class FetchrActivity extends AppCompatActivity {
                     .getSharedPreferences(MainActivity.SHARED_PREFER, MODE_PRIVATE).edit();
 
             editor.putString(MainActivity.SHARED_PREFER_NAME, fetchr.getName());
+            editor.putString(MainActivity.SHARED_PREFER_NUMBER, fetchr.getNumber());
+            editor.putString(MainActivity.SHARED_PREFER_COLLEGE, fetchr.getCollege());
+            editor.putString(MainActivity.SHARED_PREFER_MAJOR, fetchr.getMajor());
+            editor.putString(MainActivity.SHARED_PREFER_SEX, fetchr.getSex());
+            editor.putString(MainActivity.SHARED_PREFER_PROSPECT, fetchr.getProspect());
+            editor.putString(MainActivity.SHARED_PREFER_POLITICAL, fetchr.getPolitical());
+            editor.putString(MainActivity.SHARED_PREFER_FROM, fetchr.getFrom());
+            editor.putString(MainActivity.SHARED_PREFER_MIDDLE_SCHOOL, fetchr.getMiddleSchool());
+            editor.putString(MainActivity.SHARED_PREFER_NATION, fetchr.getNation());
+            editor.putString(MainActivity.SHARED_PREFER_ID, fetchr.getId());
+            editor.putString(MainActivity.SHARED_PREFER_QUALIFICATION, fetchr.getQualification());
+            editor.putString(MainActivity.SHARED_PREFER_CLASS, fetchr.getFromClass());
             editor.commit();
 
             Intent intent = new Intent(BROADCAST);

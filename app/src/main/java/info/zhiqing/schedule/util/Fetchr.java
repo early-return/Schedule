@@ -459,14 +459,17 @@ public class Fetchr {
 
 
     public static void main(String[] args) throws IOException {
-        Fetchr fetchr = new Fetchr("14101010607", "lzq1997201");
+        Scanner in = new Scanner(System.in);
+
+        String username = in.nextLine();
+        String pass = in.nextLine();
+        Fetchr fetchr = new Fetchr(username, pass);
 
         byte[] bytes = fetchr.fetchCodeImageBytes();
         DataOutputStream dos = new DataOutputStream(new FileOutputStream("/home/zhiqing/code.gif"));
         dos.write(bytes);
         dos.flush();
 
-        Scanner in = new Scanner(System.in);
         String code = in.nextLine();
 
         fetchr.logIn(code);

@@ -69,9 +69,6 @@ public class ScoreListAdapter extends RecyclerView.Adapter<ScoreListAdapter.Scor
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Intent intent = new Intent(context, ScoreInfoActivity.class);
-                //intent.putExtra(ScoreInfoActivity.EXTRA_SCORE, scores.get(position));
-                //context.startActivity(intent);
                 if(!holder.isInfoLayoutVisibled){
                     holder.infoCodeTextView.setText(scores.get(position).getCode());
                     holder.infoCreditTextView.setText(scores.get(position).getCredit() + "");

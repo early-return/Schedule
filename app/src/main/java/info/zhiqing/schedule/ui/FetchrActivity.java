@@ -106,7 +106,7 @@ public class FetchrActivity extends AppCompatActivity {
         protected void onPostExecute(byte[] bytes) {
             super.onPostExecute(bytes);
             Bitmap bitmap = null;
-            if(bytes.length != 0){
+            if(bytes != null && bytes.length != 0){
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);;
             }
             codeImageView.setImageBitmap(bitmap);
